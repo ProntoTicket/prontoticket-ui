@@ -15,6 +15,28 @@ const ECommerce: React.FC = () => {
 
   const [totalEvents, setTotalEvents] = useState(0);
 
+  const [totalProfit, setTotalProfit] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalProfit = async () => {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/api/transactions/totalamount`
+        );
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const total = await response.json();
+        console.log('Total Profit: ' + total);
+        setTotalProfit(total);
+      } catch (error) {
+        console.error('Failed to fetch total profit:', error);
+      }
+    };
+
+    fetchTotalProfit();
+  }, []);
+
   // Effect hook to fetch data from the API
   useEffect(() => {
     // Function to fetch events
@@ -117,7 +139,11 @@ const ECommerce: React.FC = () => {
             </svg>
           </CardDataStats>
 
-          <CardDataStats title="Total Profit" total="$45.2K" levelUp>
+          <CardDataStats
+            title="Total Profit"
+            total={`$${totalProfit.toFixed(2)}`}
+            levelUp
+          >
             <svg
               className="fill-primary dark:fill-white"
               width="20"
@@ -127,6 +153,7 @@ const ECommerce: React.FC = () => {
               xmlns="http://www.w3.org/2000/svg"
             ></svg>
           </CardDataStats>
+
           <CardDataStats
             title="Tickets Solds"
             total={`${totalTransactions}`}
