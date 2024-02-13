@@ -137,6 +137,12 @@ export default function Header() {
                         >
                           Profile
                         </Link>
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white"
+                        >
+                          Admin Dashboard
+                        </Link>
                         <a
                           onClick={handleLogout}
                           className="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white"

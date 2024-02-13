@@ -163,7 +163,7 @@ export default function SignUp() {
                     href="/signin"
                     className="text-blue-600 hover:underline transition duration-150 ease-in-out"
                   >
-                    Sign In
+                    sign in
                   </Link>
                 </div>
               )}
