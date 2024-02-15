@@ -1,6 +1,6 @@
-import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
 
 const options: ApexOptions = {
   legend: {
@@ -111,7 +111,7 @@ const options: ApexOptions = {
       },
     },
     min: 0,
-    max: 100,
+    max: 8000,
   },
 };
 
@@ -121,28 +121,110 @@ interface ChartOneState {
     data: number[];
   }[];
 }
+const BASE_URL = 'http://localhost:5110';
+
+// Adjust the fetchData function to accept a period parameter
+const fetchData = async (period: 'lastMonth' | 'lastYear') => {
+  try {
+    // Determine the endpoint based on the period parameter
+    const endpoint =
+      period === 'lastMonth'
+        ? `${BASE_URL}/api/transactions/saleslastmonth`
+        : `${BASE_URL}/api/transactions/saleslast12months`;
+    const response = await fetch(endpoint);
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return []; // Return empty array in case of error
+  }
+};
 
 const ChartOne: React.FC = () => {
   const [state, setState] = useState<ChartOneState>({
-    series: [
-      {
-        name: 'Product One',
-        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
-      },
-
-      {
-        name: 'Product Two',
-        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
-      },
-    ],
+    series: [],
   });
 
-  const handleReset = () => {
-    setState((prevState) => ({
-      ...prevState,
-    }));
+  const [chartOptions, setChartOptions] = useState<ApexOptions>(options);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  // Function to load data based on the selected period
+  const loadData = async (period: 'lastMonth' | 'lastYear') => {
+    const endpoint =
+      period === 'lastMonth'
+        ? `${BASE_URL}/api/transactions/saleslastmonth`
+        : `${BASE_URL}/api/transactions/saleslast12months`;
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      const salesData = data.map((item: any) => item.TotalAmount);
+      const revenueData = salesData.map((amount: number) => amount * 0.05); // Calculate revenue as 5% of sales
+      const dates = data.map((item: any) => item.Date);
+
+      // Calculate total sales and revenue
+      const totalSalesAmount = salesData.reduce(
+        (acc: number, curr: number) => acc + curr,
+        0
+      );
+      const totalRevenueAmount = revenueData.reduce(
+        (acc: number, curr: number) => acc + curr,
+        0
+      );
+
+      setTotalSales(totalSalesAmount);
+      setTotalRevenue(totalRevenueAmount);
+
+      setState({
+        series: [
+          {
+            name: 'Total Sales',
+            data: salesData,
+          },
+          {
+            name: 'Total Revenue',
+            data: revenueData,
+          },
+        ],
+      });
+
+      setChartOptions((prevOptions) => {
+        const newOptions = JSON.parse(JSON.stringify(prevOptions)); // Deep copy to change the reference
+        newOptions.xaxis.categories = dates; // Set new dates
+        return newOptions;
+      });
+
+      console.log(state);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
-  handleReset;
+
+  // Initial load for last year's data
+  useEffect(() => {
+    // Removed any dependencies from the array to ensure this only runs once
+    loadData('lastYear');
+  }, []);
+
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    'lastMonth' | 'lastYear'
+  >('lastYear');
+
+  const handleLoadLastMonthData = () => {
+    setSelectedPeriod('lastMonth');
+    loadData('lastMonth');
+  };
+
+  const handleLoadLastYearData = () => {
+    setSelectedPeriod('lastYear');
+    loadData('lastYear');
+  };
 
   return (
     <div
@@ -151,34 +233,33 @@ const ChartOne: React.FC = () => {
     >
       <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
         <div className="flex w-full flex-wrap gap-3 sm:gap-5">
-          <div className="flex min-w-47.5">
-            <span className="mr-2 mt-1 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-primary">Total Revenue</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
-            </div>
+          <div className="w-full">
+            <p className="font-semibold text-primary">Total Revenue</p>
+            {/* Display total revenue */}
+            <p className="text-sm font-medium">{totalRevenue.toFixed(2)}</p>
           </div>
-          <div className="flex min-w-47.5">
-            <span className="mr-2 mt-1 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-secondary">Total Sales</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
-            </div>
+          <div className="w-full">
+            <p className="font-semibold text-secondary">Total Sales</p>
+            {/* Display total sales */}
+            <p className="text-sm font-medium">{totalSales.toFixed(2)}</p>
           </div>
         </div>
         <div className="flex w-full max-w-45 justify-end">
           <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded bg-white px-3 py-1 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark">
-              Day
+            <button
+              onClick={handleLoadLastYearData}
+              className={`rounded bg-white px-3 py-1 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark ${
+                selectedPeriod === 'lastYear' ? 'selected-button-class' : ''
+              }`}
+            >
+              Year
             </button>
-            <button className="rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Week
-            </button>
-            <button className="rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
+            <button
+              onClick={handleLoadLastMonthData}
+              className={`rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark ${
+                selectedPeriod === 'lastMonth' ? 'selected-button-class' : ''
+              }`}
+            >
               Month
             </button>
           </div>
@@ -188,7 +269,7 @@ const ChartOne: React.FC = () => {
       <div>
         <div id="chartOne" className="-ml-5">
           <ReactApexChart
-            options={options}
+            options={chartOptions} // Use state variable here instead of the static 'options'
             series={state.series}
             type="area"
             height={350}

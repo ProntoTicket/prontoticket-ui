@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link'; // Import Link from next/link
 
 const BASE_URL = 'http://localhost:5110';
 
 interface Event {
-  _id: string;
+  Id: string;
   CreatedAt: string;
   Name: string;
   Description: string;
@@ -13,7 +14,7 @@ interface Event {
   ProducerId: string;
   ImageUrl: string;
   ShortDescription: string;
-  ProducerName?: string; // Optional because it will be added later
+  ProducerName?: string;
 }
 
 interface Producer {
@@ -41,6 +42,7 @@ const TableOne = () => {
         );
 
         setEventsData(eventsWithProducerName);
+        console.log(eventsData);
       } catch (error) {
         console.error('Failed to fetch events or producers:', error);
       }
@@ -98,33 +100,41 @@ const TableOne = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {eventsData.map((event) => (
-                  <tr key={event._id}>
+                  <tr key={event.Id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="text-sm font-medium text-gray-900">
+                      <Link href={`/admin-event/${event.Id}`}>
+                        <div className="flex items-center text-sm font-medium text-gray-900">
                           {event.Name}
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {event.ProducerName}
-                      </div>
+                      <Link href={`/admin-event/${event.Id}`}>
+                        <div className="text-sm text-gray-900">
+                          {event.ProducerName}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {event.Capacity}
-                      </div>
+                      <Link href={`/admin-event/${event.Id}`}>
+                        <div className="text-sm text-gray-900">
+                          {event.Capacity}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(event.Date).toLocaleDateString()}
-                      </div>
+                      <Link href={`/admin-event/${event.Id}`}>
+                        <div className="text-sm text-gray-900">
+                          {new Date(event.Date).toLocaleDateString()}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {event.Location}
-                      </div>
+                      <Link href={`/admin-event/${event.Id}`}>
+                        <div className="text-sm text-gray-900">
+                          {event.Location}
+                        </div>
+                      </Link>
                     </td>
                     {/* Render additional columns as needed */}
                   </tr>
