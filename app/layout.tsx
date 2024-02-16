@@ -10,11 +10,6 @@ const inter = Inter({
   display: 'swap',
 });
 
-export const metadata = {
-  title: 'ProntoTicket',
-  description: 'ProntoTicket',
-};
-
 export default function RootLayout({
   children,
 }: {

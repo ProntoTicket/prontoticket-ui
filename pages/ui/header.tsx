@@ -22,37 +22,29 @@ export default function Header() {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setTop(window.pageYOffset < 10);
-    };
-
-    // Add scroll listener
-    window.addEventListener('scroll', handleScroll);
-
-    // Remove listener on cleanup
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setIsProfileMenuOpen(false);
-    // This function checks the token in localStorage
-    const checkLoginStatus = () => {
-      const token =
-        typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const tokenCheck = () => {
+      const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
     };
 
-    // Call the function to check login status on mount
-    checkLoginStatus();
-
     // Listen for the login-success event
-    window.addEventListener('login-success', checkLoginStatus);
+    window.addEventListener('login-success', tokenCheck);
 
-    // Clean up the event listener
-    return () => window.removeEventListener('login-success', checkLoginStatus);
+    // Initial check in case the component mounts after the event was dispatched
+    tokenCheck();
+
+    return () => {
+      window.removeEventListener('login-success', tokenCheck);
+    };
   }, []);
 
-  //IDK
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/');
+    }
+    setIsProfileMenuOpen(false);
+  }, [isLoggedIn]); // Depend on isLoggedIn to trigger the effect
+
   useEffect(() => {
     console.log(isProfileMenuOpen);
     const tokenCheck = () => {
@@ -86,11 +78,9 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('user');
-    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
     router.push('/');
   };
