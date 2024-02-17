@@ -173,7 +173,7 @@ const EventPage = () => {
   return (
     <Layout>
       <div className="fixed inset-0 flex justify-center items-center ">
-        <div>
+        <div className="">
           <button
             className="absolute top-0 right-0 mt-2 mr-2 text-2xl font-semibold leading-none text-black hover:text-gray-700"
             onClick={() => window.history.back()}

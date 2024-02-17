@@ -147,11 +147,16 @@ const Hero = () => {
   );
 
   // Search functionality
+  // Search functionality
   const filteredEventsSearch = filteredEvents.filter((event) => {
     return (
       event.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.Location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.ShortDescription.toLowerCase().includes(searchTerm.toLowerCase())
+      event.ShortDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (event.Tags &&
+        event.Tags.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        ))
     );
   });
 
