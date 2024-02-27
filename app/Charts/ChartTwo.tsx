@@ -80,16 +80,26 @@ interface EventFormData {
   description: string;
   shortDescription: string;
   imageurl: string;
-  location: string;
+  address: string;
+  venueName: string;
+  zipCode: string;
+  country: string;
   capacity: number;
   startDateTimeUtc: string;
   endDateTimeUtc: string;
   producerId: string;
   tags: string[];
+  isApproved: boolean;
   ticketTypes: {
     type: string;
     price: number;
     totalTickets: number;
+  }[];
+  promoCodes: {
+    code: string;
+    discountPercentage: number;
+    isActive: boolean;
+    usageLimit: number;
   }[];
 }
 
@@ -99,13 +109,20 @@ const ChartTwo: React.FC = () => {
     description: '',
     shortDescription: '',
     imageurl: '',
-    location: '',
+    address: '',
+    venueName: '',
+    zipCode: '',
+    country: '',
     capacity: 0,
     startDateTimeUtc: '',
     endDateTimeUtc: '',
     producerId: '',
     tags: [],
+    isApproved: true, //TODO: should be false by default
     ticketTypes: [{ type: '', price: 0, totalTickets: 0 }],
+    promoCodes: [
+      { code: '', discountPercentage: 0, isActive: false, usageLimit: 0 },
+    ],
   });
 
   const [producers, setProducers] = useState<Producer[]>([]);
@@ -129,9 +146,11 @@ const ChartTwo: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    let finalValue: string | number = value;
+    let finalValue: string | number | boolean = value;
 
     // Check if the input field should be a number and convert it
     if (name === 'capacity' && value !== '') {
@@ -187,8 +206,43 @@ const ChartTwo: React.FC = () => {
     });
   };
 
+  const addPromoCode = () => {
+    setFormData({
+      ...formData,
+      promoCodes: [
+        ...formData.promoCodes,
+        { code: '', discountPercentage: 0, isActive: false, usageLimit: 0 },
+      ],
+    });
+  };
+
+  const removePromoCode = (index: number) => {
+    const updatedPromoCodes = [...formData.promoCodes];
+    updatedPromoCodes.splice(index, 1);
+    setFormData({
+      ...formData,
+      promoCodes: updatedPromoCodes,
+    });
+  };
+
   const BASE_URL = 'http://localhost:5110';
   const [successMessage, setSuccessMessage] = useState<string>('');
+
+  const handlePromoCodeChange = (
+    index: number,
+    key: string,
+    value: string | number | boolean
+  ) => {
+    const updatedPromoCodes = [...formData.promoCodes];
+    updatedPromoCodes[index] = {
+      ...updatedPromoCodes[index],
+      [key]: value,
+    };
+    setFormData({
+      ...formData,
+      promoCodes: updatedPromoCodes,
+    });
+  };
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -233,13 +287,20 @@ const ChartTwo: React.FC = () => {
         description: '',
         shortDescription: '',
         imageurl: '',
-        location: '',
+        address: '',
+        venueName: '',
+        zipCode: '',
+        country: '',
         capacity: 0,
         startDateTimeUtc: '',
         endDateTimeUtc: '',
         producerId: '',
         tags: [],
+        isApproved: false,
         ticketTypes: [{ type: '', price: 0, totalTickets: 0 }],
+        promoCodes: [
+          { code: '', discountPercentage: 0, isActive: false, usageLimit: 0 },
+        ],
       }); // Clear the form data
     } catch (error: any) {
       // Explicitly type 'error' as 'any'
@@ -259,7 +320,7 @@ const ChartTwo: React.FC = () => {
     >
       <div>
         <h4 className="text-xl font-semibold text-black dark:text-white mb-4">
-          Add Event
+          Create Event
         </h4>
       </div>
       <div className="mb-4 justify-between gap-4 sm:flex">
@@ -300,12 +361,30 @@ const ChartTwo: React.FC = () => {
               onChange={handleInputChange}
               className="border border-gray-300 w-full"
             />
-            {/* Event Location Input */}
+            {/* Address Input */}
             <input
               type="text"
-              name="location"
-              placeholder="Event Location"
-              value={formData.location}
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleInputChange}
+              className="border border-gray-300 w-full"
+            />
+            {/* Venue Name Input */}
+            <input
+              type="text"
+              name="venueName"
+              placeholder="Venue Name"
+              value={formData.venueName}
+              onChange={handleInputChange}
+              className="border border-gray-300 w-full"
+            />
+            {/* Country Input */}
+            <input
+              type="text"
+              name="country"
+              placeholder="Country"
+              value={formData.country}
               onChange={handleInputChange}
               className="border border-gray-300 w-full"
             />
@@ -370,6 +449,7 @@ const ChartTwo: React.FC = () => {
                 </option>
               ))}
             </select>
+
             {/* Event Tags Input */}
             <input
               type="text"
@@ -396,7 +476,6 @@ const ChartTwo: React.FC = () => {
                   className="border border-gray-300 w-full"
                 />
                 {/* Ticket Price Input */}
-
                 <input
                   type="number"
                   name={`ticketTypes[${index}].price`}
@@ -431,14 +510,90 @@ const ChartTwo: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => removeTicketType(index)}
-                    className=" text-black px-2 py-2 rounded w-auto"
+                    className="text-black px-2 py-2 rounded w-auto"
                   >
                     -
                   </button>
                   <button
                     type="button"
                     onClick={addTicketType}
-                    className=" text-black px-4 py-2 rounded w-auto"
+                    className="text-black px-4 py-2 rounded w-auto"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+            {/* Promo Codes */}
+            {formData.promoCodes.map((promoCode, index) => (
+              <div key={index} className="flex flex-col mb-2">
+                {/* Promo Code Input */}
+                <input
+                  type="text"
+                  name={`promoCodes[${index}].code`}
+                  placeholder="Promo Code"
+                  value={promoCode.code}
+                  onChange={(e) =>
+                    handlePromoCodeChange(index, 'code', e.target.value)
+                  }
+                  className="border border-gray-300 w-full"
+                />
+                {/* Promo Code Discount Percentage Input */}
+                <input
+                  type="number"
+                  name={`promoCodes[${index}].discountPercentage`}
+                  placeholder="Discount Percentage"
+                  value={promoCode.discountPercentage}
+                  onChange={(e) =>
+                    handlePromoCodeChange(
+                      index,
+                      'discountPercentage',
+                      Number(e.target.value)
+                    )
+                  }
+                  className="border border-gray-300 w-full"
+                />
+                {/* Promo Code Active Input */}
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name={`promoCodes[${index}].isActive`}
+                    checked={promoCode.isActive}
+                    onChange={(e) =>
+                      handlePromoCodeChange(index, 'isActive', e.target.checked)
+                    }
+                    className="border border-gray-300"
+                  />
+                  <span>Active</span>
+                </label>
+                {/* Promo Code Usage Limit Input */}
+                <input
+                  type="number"
+                  name={`promoCodes[${index}].usageLimit`}
+                  placeholder="Usage Limit"
+                  value={promoCode.usageLimit}
+                  onChange={(e) =>
+                    handlePromoCodeChange(
+                      index,
+                      'usageLimit',
+                      Number(e.target.value)
+                    )
+                  }
+                  className="border border-gray-300 w-full"
+                />
+                {/* Remove and Add Promo Code Buttons */}
+                <div className="flex">
+                  <button
+                    type="button"
+                    onClick={() => removePromoCode(index)}
+                    className="text-black px-2 py-2 rounded w-auto"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addPromoCode}
+                    className="text-black px-4 py-2 rounded w-auto"
                   >
                     +
                   </button>

@@ -176,7 +176,7 @@ const ChartOneEventSpecific: React.FC<ChartOneEventSpecificProps> = ({
       console.log('Fetched data:', data); // Log the fetched data
       const salesData = data.map((item: any) => item.TotalAmount);
       console.log('Sales data:', salesData); // Log the sales data
-      const revenueData = salesData.map((amount: number) => amount * 0.05); // Assuming 5% revenue calculation
+      const revenueData = salesData.map((amount: number) => amount * 0.05); // TODO: This is a 5% revenue calculation
       const dates = data.map((item: any) => item.Date);
       console.log('Dates:', dates); // Log the dates
 

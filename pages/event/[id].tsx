@@ -19,7 +19,7 @@ interface Event {
   Capacity: number;
   StartDateTimeUtc: Date;
   EndDateTimeUtc: Date;
-  Location: string;
+  Address: string;
   ProducerId: string;
   ImageUrl: string;
   Price: number;
@@ -46,6 +46,52 @@ const EventPage = () => {
     [key: string]: number;
   }>({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+
+  // Handler function to update promo code state
+  const handlePromoCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPromoCode(e.target.value);
+  };
+
+  // User details state
+  const [userDetails, setUserDetails] = useState<{
+    userId: string | null;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+  }>({
+    userId: null,
+    email: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+  });
+
+  useEffect(() => {
+    // Fetch user details from localStorage
+    const userString = localStorage.getItem('user'); // Assuming 'user' contains the stringified user object
+    const user = userString ? JSON.parse(userString) : null; // Parse the string if it exists
+
+    const userId = user ? user.Id : null;
+    const email = user ? user.Email || '' : '';
+    const firstName = user ? user.FirstName || '' : '';
+    const lastName = user ? user.LastName || '' : '';
+    const phoneNumber = user ? user.PhoneNumber || '' : '';
+
+    setUserDetails({
+      userId: userId,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+    });
+  }, []); // Run only once on component mount
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUserDetails({ ...userDetails, [name]: value });
+  };
 
   useEffect(() => {
     if (eventId) {
@@ -100,15 +146,12 @@ const EventPage = () => {
     return totalPrice;
   };
 
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
   const handleBuyClick = async () => {
     setIsProcessing(true);
 
-    // Retrieve user details from localStorage, if available
-    const userId = localStorage.getItem('Id');
-    const email = localStorage.getItem('Email') || 'defaultemail@example.com';
-    const firstName = localStorage.getItem('FirstName') || 'FirstName';
-    const lastName = localStorage.getItem('LastName') || 'LastName';
-    const phoneNumber = '1234567890'; // Hardcoded phone number for now
+    const { userId, email, firstName, lastName, phoneNumber } = userDetails;
 
     const purchases = Object.keys(selectedTickets).map((ticketId) => ({
       Quantity: selectedTickets[ticketId],
@@ -123,6 +166,7 @@ const EventPage = () => {
       Email: email,
       PhoneNumber: phoneNumber,
       Purchases: purchases,
+      PromoCode: promoCode,
     };
 
     try {
@@ -137,10 +181,9 @@ const EventPage = () => {
       if (!response.ok) {
         // If the response status code is not OK, it's an error
         const errorText = await response.text(); // Try to read the error response
-        throw new Error(`Failed to create payment link: ${errorText}`);
+        throw new Error(`${errorText}`);
       }
 
-      // Assuming the API might return a plain text URL (not JSON) if successful
       const data = await response.text(); // First attempt to read as text
 
       // Check if the data looks like a URL, which means the Stripe link was created successfully
@@ -158,6 +201,7 @@ const EventPage = () => {
       }
     } catch (error) {
       console.error('Error creating payment link:', error);
+      setErrorMessage('' + error);
     } finally {
       setIsProcessing(false);
     }
@@ -172,30 +216,72 @@ const EventPage = () => {
 
   return (
     <Layout>
-      <div className="fixed inset-0 flex justify-center items-center ">
-        <div className="">
-          <button
-            className="absolute top-0 right-0 mt-2 mr-2 text-2xl font-semibold leading-none text-black hover:text-gray-700"
-            onClick={() => window.history.back()}
-          >
-            &times;
-          </button>
+      <div className="fixed inset-0 flex justify-center items-center overflow-y-auto">
+        <div className="max-w-md mx-auto bg-white rounded-lg overflow-hidden">
           <img
             src={event.ImageUrl}
             alt={event.Name}
-            className="mt-6 rounded-lg w-full"
+            className="mt-6 rounded-t-lg w-full max-h-96 object-cover"
           />
-          <div className="p-2">
+          <div className="p-4">
             <h2 className="text-xl font-bold mb-2">{event.Name}</h2>
             <p className="mb-2 text-sm">{event.Description}</p>
             <p className="mb-1 text-sm">
               <strong>Location: </strong>
-              {event.Location}
+              {event.Address}
             </p>
             <p className="mb-1 text-sm">
               <strong>Date: </strong>
               {new Date(event.StartDateTimeUtc).toLocaleDateString()}{' '}
             </p>
+            {/* User details form */}
+            {!userDetails.userId && ( // Show the form if userId is not present
+              <form>
+                <input
+                  type="email"
+                  name="email"
+                  value={userDetails.email}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  className="border border-gray-300 rounded-md px-1 py-1 w-full text-sm mb-2"
+                />
+                <input
+                  type="text"
+                  name="firstName"
+                  value={userDetails.firstName}
+                  onChange={handleInputChange}
+                  placeholder="First Name"
+                  className="border border-gray-300 rounded-md px-1 py-1 w-full text-sm mb-2"
+                />
+                <input
+                  type="text"
+                  name="lastName"
+                  value={userDetails.lastName}
+                  onChange={handleInputChange}
+                  placeholder="Last Name"
+                  className="border border-gray-300 rounded-md px-1 py-1 w-full text-sm mb-2"
+                />
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={userDetails.phoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  className="border border-gray-300 rounded-md px-1 py-1 w-full text-sm mb-2"
+                />
+              </form>
+            )}
+            <p className="mt-5 mb-1 text-sm">
+              <strong>Promo Code</strong>
+            </p>
+            <input
+              type="text"
+              name="promoCode"
+              value={promoCode}
+              onChange={handlePromoCodeChange}
+              placeholder="Promo Code"
+              className="border border-gray-300 rounded-md px-1 py-1 text-sm mb-2"
+            />
             <div className="grid grid-cols-2 gap-2 mt-4">
               {ticketTypes.map((ticket) => (
                 <div key={ticket.Id} className="mb-1">
@@ -222,6 +308,9 @@ const EventPage = () => {
             <p className="text-sm font-bold mt-2">
               Total Price: ${getTotalPrice()}
             </p>
+            {errorMessage && (
+              <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
+            )}
             <button
               onClick={handleBuyClick}
               disabled={isProcessing}

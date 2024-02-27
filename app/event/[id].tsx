@@ -14,7 +14,7 @@ interface Event {
   Location: string;
   ProducerId: string;
   ImageUrl: string;
-  Price: number; // Assuming this is how you're storing price
+  Price: number;
 }
 
 const EventDetailPage = () => {

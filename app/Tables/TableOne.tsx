@@ -10,7 +10,7 @@ interface Event {
   Description: string;
   Capacity: number;
   Date: string;
-  Location: string;
+  Address: string;
   ProducerId: string;
   ImageUrl: string;
   ShortDescription: string;
@@ -78,7 +78,7 @@ const TableOne = () => {
     const filteredEvents = events.filter(
       (event) =>
         event.Name.toLowerCase().includes(term.toLowerCase()) ||
-        event.Location.toLowerCase().includes(term.toLowerCase()) ||
+        event.Address.toLowerCase().includes(term.toLowerCase()) ||
         (event.ProducerName &&
           event.ProducerName.toLowerCase().includes(term.toLowerCase()))
     );
@@ -206,7 +206,11 @@ const TableOne = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {eventsData.map((event) => (
-                  <tr key={event.Id}>
+                  <tr
+                    key={event.Id}
+                    onClick={() => handleEventClick(event.Id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="flex items-center text-sm font-medium text-gray-900">
                         {event.Name}
@@ -229,7 +233,7 @@ const TableOne = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
-                        {event.Location}
+                        {event.Address}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

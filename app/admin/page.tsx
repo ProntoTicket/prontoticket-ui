@@ -67,7 +67,7 @@ const ECommerce: React.FC = () => {
         const response = await fetch(`${BASE_URL}/api/users/count`);
         const data = await response.json();
         console.log(data);
-        setTotalUsers(data); // Assuming the endpoint returns the count directly
+        setTotalUsers(data);
       } catch (error) {
         console.error('Failed to fetch users count:', error);
       }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(''); // State hook for error message
 
@@ -29,7 +29,7 @@ export default function SignIn() {
       const response = await fetch(`${BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -37,8 +37,18 @@ export default function SignIn() {
       }
 
       const data = await response.json();
+
+      // Fetch the user object using the user ID
+      const userResponse = await fetch(`${BASE_URL}/api/users/${data.Id}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data.');
+      }
+      const userData = await userResponse.json();
+
+      // Store user and token in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', data.Token);
-      localStorage.setItem('user', JSON.stringify(data.User));
+
       setSignedIn(true); // Set signedIn to true on successful login
       window.dispatchEvent(new CustomEvent('login-success'));
     } catch (error) {
@@ -52,9 +62,7 @@ export default function SignIn() {
         <div className="pt-32 pb-12 md:pt-40 md:pb-20">
           {/* Page header */}
           <div className="max-w-3xl mx-auto text-center pb-12 md:pb-20">
-            <h1 className="h1">
-              Welcome back. We exist to make entrepreneurism easier.
-            </h1>
+            <h1 className="h1">Welcome to ProntoTicket</h1>
           </div>
 
           {/* Form */}
@@ -66,16 +74,16 @@ export default function SignIn() {
                     className="block text-gray-800 text-sm font-medium mb-1"
                     htmlFor="email"
                   >
-                    Username
+                    Email
                   </label>
                   <input
-                    id="username"
-                    type="username"
+                    id="email"
+                    type="email"
                     className="form-input w-full text-gray-800"
-                    placeholder="Enter your username"
+                    placeholder="Enter your email"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>

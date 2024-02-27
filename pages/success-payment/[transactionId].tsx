@@ -1,8 +1,49 @@
-'use client';
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import Layout from '../layout';
 
+// Define the SuccessPage component
 const SuccessPage = () => {
+  // Access router to get transaction confirmation number from the URL
+  const router = useRouter();
+  const { transactionId } = router.query;
+
+  // Define useEffect hook to call the /complete endpoint when the component mounts
+  useEffect(() => {
+    // Define a function to call the /complete endpoint
+    const completeTransaction = async () => {
+      try {
+        // Make a POST request to the backend endpoint
+        const response = await fetch(
+          `http://localhost:5110/api/transactions/complete`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ Confirmation: transactionId }), // Pass the transaction confirmation number
+          }
+        );
+
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error('Failed to complete transaction');
+        }
+
+        // Log success message if the transaction is completed successfully
+        console.log('Transaction completed successfully');
+      } catch (error) {
+        console.error('Error completing transaction:', error);
+      }
+    };
+
+    // Call the completeTransaction function
+    if (transactionId) {
+      completeTransaction();
+    }
+  }, [transactionId]); // Run the effect only when transactionId changes
+
+  // Return the UI of the success page
   return (
     <Layout>
       <div
@@ -20,7 +61,7 @@ const SuccessPage = () => {
                 Ticket
               </span>
             </h2>
-            <h2 className="text-1xl md:text-2xl font-extrabold leading-tighter tracking-tighter mb-10 mt-16">
+            <h2 className="text-1xl md:text-2xl font-extrabold leading-tighter trackinga-tighter mb-10 mt-16">
               Your Order Has Been Successful
             </h2>
           </div>
@@ -30,4 +71,5 @@ const SuccessPage = () => {
   );
 };
 
+// Export the SuccessPage component
 export default SuccessPage;

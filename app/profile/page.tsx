@@ -7,7 +7,6 @@ const Profile = () => {
     FirstName: '',
     LastName: '',
     Email: '',
-    Username: '',
     EventsAttended: [],
   });
   const [editMode, setEditMode] = useState(false);
@@ -120,7 +119,6 @@ const Profile = () => {
           body: JSON.stringify({
             FirstName: editedUser.FirstName,
             LastName: editedUser.LastName,
-            Username: editedUser.Username, // This now references editedUser
             Email: editedUser.Email,
           }),
         });
@@ -183,7 +181,7 @@ const Profile = () => {
               // Edit Mode
               <>
                 <div className="flex flex-col items-center justify-center gap-1 border-b md:border-b-0 md:border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="text-sm">Name</span>
+                  <span className="text-sm">First Name</span>
                   <input
                     type="text"
                     name="FirstName"
@@ -192,12 +190,16 @@ const Profile = () => {
                     placeholder="First Name"
                     className="text-center"
                   />
+                </div>
+
+                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
+                  <span className="text-sm">Last Name</span>
                   <input
                     type="text"
                     name="LastName"
                     value={editedUser.LastName}
                     onChange={handleChange}
-                    placeholder="Last Name"
+                    placeholder="LastName"
                     className="text-center"
                   />
                 </div>
@@ -212,37 +214,26 @@ const Profile = () => {
                     className="text-center"
                   />
                 </div>
-                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
-                  <span className="text-sm">Username</span>
-                  <input
-                    type="text"
-                    name="Username"
-                    value={editedUser.Username}
-                    onChange={handleChange}
-                    placeholder="Username"
-                    className="text-center"
-                  />
-                </div>
               </>
             ) : (
               // View Mode
               <>
                 <div className="flex flex-col items-center justify-center gap-1 border-b md:border-b-0 md:border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="text-sm">Name</span>
+                  <span className="text-sm">First Name</span>
                   <span className="font-semibold text-black dark:text-white">
-                    {user.FirstName} {user.LastName}
+                    {user.FirstName}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
+                  <span className="text-sm">Last Name</span>
+                  <span className="font-semibold text-black dark:text-white">
+                    {user.LastName}
                   </span>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-1 border-b md:border-b-0 md:border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
                   <span className="text-sm">Email Address</span>
                   <span className="font-semibold text-black dark:text-white">
                     {user.Email}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
-                  <span className="text-sm">Username</span>
-                  <span className="font-semibold text-black dark:text-white">
-                    @{user.Username}
                   </span>
                 </div>
               </>

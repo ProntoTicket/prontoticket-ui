@@ -12,7 +12,7 @@ interface Event {
   Capacity: number;
   StartDateTimeUtc: Date;
   EndDateTimeUtc: Date;
-  Location: string;
+  Address: string;
   ProducerId: string;
   ImageUrl: string;
   Price: number;
@@ -93,7 +93,7 @@ const EventCard = ({ event }: { event: Event }) => (
         <p className="mt-3 text-base text-gray-500">{event.ShortDescription}</p>
         <p className="text-sm text-gray-600 mt-2">
           {new Date(event.StartDateTimeUtc).toLocaleDateString()} -{' '}
-          {event.Location}
+          {event.Address}
         </p>
       </div>
       <button
@@ -151,7 +151,7 @@ const Hero = () => {
   const filteredEventsSearch = filteredEvents.filter((event) => {
     return (
       event.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.Location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.Address.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.ShortDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (event.Tags &&
         event.Tags.some((tag) =>

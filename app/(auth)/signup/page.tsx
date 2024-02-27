@@ -6,11 +6,11 @@ import { useState } from 'react';
 const BASE_URL = 'http://localhost:5110';
 
 export default function SignUp() {
-  const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // New state for phone number input
   const [signupSuccess, setSignupSuccess] = useState(false); // Boolean state to indicate signup success
 
   // Function to handle form submission
@@ -24,11 +24,12 @@ export default function SignUp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username,
           firstName,
           lastName,
           email,
+          phoneNumber,
           password,
+          isProducer: false, // Set isProducer to false for now
         }),
       });
 
@@ -101,23 +102,6 @@ export default function SignUp() {
               <div className="w-full px-3 mb-4">
                 <label
                   className="block text-gray-800 text-sm font-medium mb-1"
-                  htmlFor="username"
-                >
-                  Username <span className="text-red-600">*</span>
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  className="form-input w-full text-gray-800"
-                  placeholder="Enter your username"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-              <div className="w-full px-3 mb-4">
-                <label
-                  className="block text-gray-800 text-sm font-medium mb-1"
                   htmlFor="email"
                 >
                   Email <span className="text-red-600">*</span>
@@ -130,6 +114,23 @@ export default function SignUp() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="w-full px-3 mb-4">
+                <label
+                  className="block text-gray-800 text-sm font-medium mb-1"
+                  htmlFor="phoneNumber"
+                >
+                  Phone Number <span className="text-red-600">*</span>
+                </label>
+                <input
+                  required
+                  id="phoneNumber"
+                  type="tel"
+                  className="form-input w-full text-gray-800"
+                  placeholder="Enter your phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                 />
               </div>
               <div className="w-full px-3 mb-4">
