@@ -27,11 +27,18 @@ const SuccessPage = () => {
 
         // Check if the response is successful
         if (!response.ok) {
-          throw new Error('Failed to generate tickets');
+          // If response is not ok, throw an error with the status text
+          throw new Error(`Failed to generate tickets: ${response.statusText}`);
         }
 
-        // Log success message if the transaction is completed successfully
-        console.log('Transaction completed successfully');
+        // Parse the JSON response body
+        const tickets = await response.json();
+
+        // Log success message and the tickets if the transaction is completed successfully
+        console.log(
+          'Transaction completed successfully, tickets generated:',
+          tickets
+        );
       } catch (error) {
         console.error('Error completing transaction:', error);
       }
