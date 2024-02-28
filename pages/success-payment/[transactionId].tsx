@@ -8,14 +8,14 @@ const SuccessPage = () => {
   const router = useRouter();
   const { transactionId } = router.query;
 
-  // Define useEffect hook to call the /complete endpoint when the component mounts
+  // Define useEffect hook to call the /generate endpoint when the component mounts
   useEffect(() => {
-    // Define a function to call the /complete endpoint
+    // Define a function to call the /generate endpoint
     const completeTransaction = async () => {
       try {
         // Make a POST request to the backend endpoint
         const response = await fetch(
-          `http://localhost:5110/api/transactions/complete`,
+          `http://localhost:5110/api/tickets/generate`,
           {
             method: 'POST',
             headers: {
@@ -27,7 +27,7 @@ const SuccessPage = () => {
 
         // Check if the response is successful
         if (!response.ok) {
-          throw new Error('Failed to complete transaction');
+          throw new Error('Failed to generate tickets');
         }
 
         // Log success message if the transaction is completed successfully
